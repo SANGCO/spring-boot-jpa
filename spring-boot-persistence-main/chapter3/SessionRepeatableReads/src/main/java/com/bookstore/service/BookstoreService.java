@@ -67,6 +67,7 @@ public class BookstoreService {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 Author authorA1 = authorRepository.findById(1L).orElseThrow();
                 System.out.println("Author A1: " + authorA1.getName() + "\n");
+                // TODO   Author A1: Mark Janel
 
                 // Transaction B
                 template.execute(new TransactionCallbackWithoutResult() {
@@ -76,31 +77,57 @@ public class BookstoreService {
                         Author authorB = authorRepository.findById(1L).orElseThrow();
                         authorB.setName("Alicia Tom");
                         System.out.println("Author B: " + authorB.getName() + "\n");
+                        // TODO   Author B: Alicia Tom
                     }
                 });
-
-                // Direct fetching via findById(), find() and get() doesn't trigger a SELECT
-                // It loads the author directly from Persistence Context
-                Author authorA2 = authorRepository.findById(1L).orElseThrow();
-                System.out.println("\nAuthor A2: " + authorA2.getName() + "\n");
-
-                // JPQL entity queries take advantage of session-level repeatable reads
-                // The data snapshot returned by the triggered SELECT is ignored
-                Author authorViaJpql = authorRepository.fetchByIdJpql(1L);
-                System.out.println("Author via JPQL: " + authorViaJpql.getName() + "\n");
-
-                // SQL entity queries take advantage of session-level repeatable reads
-                // The data snapshot returned by the triggered SELECT is ignored
-                Author authorViaSql = authorRepository.fetchByIdSql(1L);
-                System.out.println("Author via SQL: " + authorViaSql.getName() + "\n");
 
                 // JPQL query projections always load the latest database state
                 String nameViaJpql = authorRepository.fetchNameByIdJpql(1L);
                 System.out.println("Author name via JPQL: " + nameViaJpql + "\n");
+                // TODO   Author name via JPQL: Alicia Tom
 
                 // SQL query projections always load the latest database state
                 String nameViaSql = authorRepository.fetchNameByIdSql(1L);
                 System.out.println("Author name via SQL: " + nameViaSql + "\n");
+                // TODO   Author name via SQL: Alicia Tom
+
+                // TODO 변경사항이 감지되는게 없기 때문에 JPQL 쿼리로 플러시 자동 호출되지 않는다.
+                Author authorViaJpql = authorRepository.fetchByIdJpql(1L);
+                System.out.println("Author via JPQL: " + authorViaJpql.getName() + "\n");
+                // TODO   Author via JPQL: Mark Janel
+
+                // Direct fetching via findById(), find() and get() doesn't trigger a SELECT
+                // It loads the author directly from Persistence Context
+                Author authorA2 = authorRepository.findById(1L).orElseThrow();
+                System.out.println("\nAuthor A2: " + authorA2.getName() + ", " + "\n");
+                // TODO   Author A2: Mark Janel
+
+                // SQL entity queries take advantage of session-level repeatable reads
+                // The data snapshot returned by the triggered SELECT is ignored
+                Author authorViaSql = authorRepository.fetchByIdSql(1L);
+                System.out.println("Author via SQL: " + authorViaSql.getName() + ", " + "\n");
+                // TODO   Author via SQL: Mark Janel
+
+                // JPQL entity queries take advantage of session-level repeatable reads
+                // The data snapshot returned by the triggered SELECT is ignored
+                // TODO 수정이 감지되면 JPQL 쿼리가 플러시 자동 호출하는지 테스트
+                authorA1.setAge(35);
+                authorA1.setName("SANGCO");
+                authorViaJpql = authorRepository.fetchByIdJpql(1L);
+                System.out.println("Author via JPQL: " + authorViaJpql.getName() + ", " + authorViaJpql.getAge() + "\n");
+                // TODO   Author via JPQL: SANGCO, 35
+
+                // TODO authorA1.setAge(35); 변경 하면서 name은 다시 Mark Janel로 변경되었다.
+
+                // JPQL query projections always load the latest database state
+                nameViaJpql = authorRepository.fetchNameByIdJpql(1L);
+                System.out.println("Author name via JPQL: " + nameViaJpql + "\n");
+                // TODO   Author name via JPQL: SANGCO
+
+                // SQL query projections always load the latest database state
+                nameViaSql = authorRepository.fetchNameByIdSql(1L);
+                System.out.println("Author name via SQL: " + nameViaSql + "\n");
+                // TODO   Author name via SQL: SANGCO
             }
         });
     }
