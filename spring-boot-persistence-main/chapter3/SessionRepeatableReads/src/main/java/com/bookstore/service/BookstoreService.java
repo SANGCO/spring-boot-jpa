@@ -112,12 +112,12 @@ public class BookstoreService {
                 // The data snapshot returned by the triggered SELECT is ignored
                 // TODO 수정이 감지되면 JPQL 쿼리가 플러시 자동 호출하는지 테스트
                 authorA1.setAge(35);
+                // .setName("SANGCO") 안했으면 .setAge(35); 변경 하면서 name은 다시 Mark Janel로 변경되었다.
                 authorA1.setName("SANGCO");
                 authorViaJpql = authorRepository.fetchByIdJpql(1L);
                 System.out.println("Author via JPQL: " + authorViaJpql.getName() + ", " + authorViaJpql.getAge() + "\n");
                 // TODO   Author via JPQL: SANGCO, 35
 
-                // TODO authorA1.setAge(35); 변경 하면서 name은 다시 Mark Janel로 변경되었다.
 
                 // JPQL query projections always load the latest database state
                 nameViaJpql = authorRepository.fetchNameByIdJpql(1L);
@@ -132,3 +132,5 @@ public class BookstoreService {
         });
     }
 }
+
+
