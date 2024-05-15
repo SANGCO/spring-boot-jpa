@@ -4,6 +4,8 @@ import com.bookstore.dao.Dao;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -12,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import java.util.Optional;
 
 @Service
@@ -19,11 +23,13 @@ public class BookstoreService {
     private final AuthorRepository authorRepository;
     private final TransactionTemplate template;
     private final Dao dao;
+    private final EntityManager entityManager;
 
-    public BookstoreService(AuthorRepository authorRepository, TransactionTemplate template, Dao dao) {
+    public BookstoreService(AuthorRepository authorRepository, TransactionTemplate template, Dao dao, EntityManager entityManager) {
         this.authorRepository = authorRepository;
         this.template = template;
         this.dao = dao;
+        this.entityManager = entityManager;
     }
 
     @Transactional(readOnly=true)
@@ -81,6 +87,10 @@ public class BookstoreService {
                     }
                 });
 
+
+                // Print flush mode
+                printFlushMode();
+
                 // JPQL query projections always load the latest database state
                 String nameViaJpql = authorRepository.fetchNameByIdJpql(1L);
                 System.out.println("Author name via JPQL: " + nameViaJpql + "\n");
@@ -118,7 +128,6 @@ public class BookstoreService {
                 System.out.println("Author via JPQL: " + authorViaJpql.getName() + ", " + authorViaJpql.getAge() + "\n");
                 // TODO   Author via JPQL: SANGCO, 35
 
-
                 // JPQL query projections always load the latest database state
                 nameViaJpql = authorRepository.fetchNameByIdJpql(1L);
                 System.out.println("Author name via JPQL: " + nameViaJpql + "\n");
@@ -131,6 +140,14 @@ public class BookstoreService {
             }
         });
     }
+
+    private void printFlushMode() {
+        FlushModeType flushMode = entityManager.getFlushMode();
+        FlushModeType hibernateFlushMode = entityManager.unwrap(Session.class).getFlushMode();
+        System.out.println("Flush mode, Hibernate JPA (EntityManager#getFlushMode()): " + flushMode);
+        System.out.println("Flush mode, Hibernate JPA (Session#getFlushMode()): " + hibernateFlushMode);
+    }
+
 }
 
 
